@@ -518,5 +518,19 @@
 
     renderPosts();
   </script>
+  
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = "youhttps://nbihpyasjpfeonuwxcgj.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_EL2zVeE_fiIY6Ua8VWpRNg_x3vxQez7";
+
+  const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+  console.log("Vibe connected to Supabase");
+</script>
+  
 </body>
 </html>
