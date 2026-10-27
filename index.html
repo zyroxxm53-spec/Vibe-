@@ -1,0 +1,522 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Vibe — Your people, your space.">
+  <title>Vibe — Your people, your space</title>
+  <style>
+    :root {
+      --purple: #7257ed;
+      --light-purple: #f1edff;
+      --text: #211d32;
+      --muted: #8c899b;
+      --border: #efedf4;
+      --white: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #faf9fc;
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .topbar {
+      height: 72px;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 max(5%, calc((100% - 1120px) / 2));
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .logo {
+      font-size: 30px;
+      font-weight: 850;
+      letter-spacing: -2px;
+      color: var(--purple);
+    }
+
+    .logo span { color: var(--text); }
+
+    .search {
+      width: min(38%, 330px);
+      background: #f6f5f9;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      padding: 12px 15px;
+      outline: none;
+    }
+
+    .search:focus { border-color: #c9bfff; }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #d9ccff, #9278f5);
+      display: grid;
+      place-items: center;
+      color: #352268;
+      font-weight: 800;
+    }
+
+    .layout {
+      max-width: 1120px;
+      margin: 30px auto;
+      padding: 0 18px;
+      display: grid;
+      grid-template-columns: 225px minmax(0, 590px) 225px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .panel, .post, .composer, .welcome {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    .panel { padding: 18px; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 10px;
+      margin: 3px 0;
+      border-radius: 12px;
+      color: #777286;
+      font-size: 14px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .nav-item.active, .nav-item:hover {
+      background: var(--light-purple);
+      color: var(--purple);
+      font-weight: 700;
+    }
+
+    .nav-icon { width: 23px; text-align: center; }
+
+    .welcome {
+      padding: 25px;
+      background: linear-gradient(125deg, #f0ebff, #fff 75%);
+      margin-bottom: 20px;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--purple);
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: clamp(27px, 4vw, 38px);
+      line-height: 1.12;
+      letter-spacing: -1.6px;
+      margin: 12px 0;
+    }
+
+    .welcome p, .muted {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .composer { padding: 18px; margin-bottom: 20px; }
+
+    .compose-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .compose-input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: #f8f7fb;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .primary {
+      border: 0;
+      background: var(--purple);
+      color: white;
+      font-weight: 700;
+      border-radius: 12px;
+      padding: 12px 17px;
+    }
+
+    .primary:hover { background: #5b43d2; }
+
+    .post { padding: 20px; margin-bottom: 16px; }
+
+    .post-head {
+      display: flex;
+      gap: 11px;
+      align-items: center;
+    }
+
+    .post-name { font-weight: 750; font-size: 14px; }
+    .post-handle { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+    .post-text {
+      font-size: 14px;
+      line-height: 1.75;
+      margin: 17px 0;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .post-actions {
+      display: flex;
+      gap: 20px;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+    }
+
+    .action {
+      background: transparent;
+      border: 0;
+      color: #888397;
+      padding: 3px 0;
+      font-size: 13px;
+    }
+
+    .action.liked { color: #e94e86; }
+
+    .section-title { font-size: 15px; margin: 0 0 17px; }
+
+    .person {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .person-info { flex: 1; min-width: 0; }
+    .person-name { font-size: 12px; font-weight: 750; }
+    .person-handle { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    .follow {
+      border: 1px solid #ded6ff;
+      color: var(--purple);
+      background: white;
+      border-radius: 9px;
+      padding: 7px 9px;
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .follow.following { background: var(--light-purple); }
+
+    .empty { text-align: center; padding: 30px 15px; color: var(--muted); }
+    .footer { color: #a5a1b1; font-size: 11px; line-height: 2; margin-top: 16px; }
+
+    .mobile-nav { display: none; }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 190px minmax(0, 1fr);
+        gap: 16px;
+      }
+      .right-column { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      .topbar { height: 62px; padding: 0 16px; gap: 12px; }
+      .logo { font-size: 27px; }
+      .search { width: auto; flex: 1; min-width: 0; padding: 10px; }
+      .layout { display: block; margin: 16px auto 85px; padding: 0 12px; }
+      .left-column { display: none; }
+      .welcome { padding: 21px; }
+      .post { padding: 16px; }
+      .composer { padding: 14px; }
+      .mobile-nav {
+        position: fixed;
+        z-index: 10;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border-top: 1px solid var(--border);
+        padding: 11px 7px calc(11px + env(safe-area-inset-bottom));
+        display: flex;
+        justify-content: space-around;
+      }
+      .mobile-nav button {
+        background: none;
+        border: 0;
+        color: #8b869b;
+        font-size: 20px;
+        padding: 5px 10px;
+      }
+      .mobile-nav button.active { color: var(--purple); }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">vibe<span>.</span></div>
+    <input class="search" id="search" placeholder="Search Vibe..." aria-label="Search posts">
+    <div class="avatar" title="Your profile">V</div>
+  </header>
+
+  <main class="layout">
+    <aside class="left-column">
+      <nav class="panel">
+        <a class="nav-item active" href="#home" data-page="home"><span class="nav-icon">⌂</span> Home</a>
+        <a class="nav-item" href="#discover" data-page="discover"><span class="nav-icon">✧</span> Discover</a>
+        <a class="nav-item" href="#profile" data-page="profile"><span class="nav-icon">◎</span> My profile</a>
+        <a class="nav-item" href="#messages" data-page="messages"><span class="nav-icon">◇</span> Messages</a>
+      </nav>
+      <div class="footer">Vibe · Your people, your space.<br>Made for meaningful connections.</div>
+    </aside>
+
+    <section>
+      <div class="welcome" id="home">
+        <div class="eyebrow">YOUR SPACE, YOUR PEOPLE</div>
+        <h1>A little more you.<br>A little more connected.</h1>
+        <p>Share your thoughts, find your people, and make every connection count.</p>
+      </div>
+
+      <form class="composer" id="postForm">
+        <div class="compose-row">
+          <div class="avatar">V</div>
+          <input class="compose-input" id="postInput" maxlength="1000" placeholder="What's on your mind?" required>
+          <button class="primary" type="submit">Post</button>
+        </div>
+      </form>
+
+      <div id="feed" aria-live="polite"></div>
+    </section>
+
+    <aside class="right-column">
+      <div class="panel">
+        <h2 class="section-title">People to discover</h2>
+        <div class="person">
+          <div class="avatar">A</div>
+          <div class="person-info"><div class="person-name">Amara James</div><div class="person-handle">@amaraj</div></div>
+          <button class="follow">Follow</button>
+        </div>
+        <div class="person">
+          <div class="avatar">K</div>
+          <div class="person-info"><div class="person-name">Kai Morgan</div><div class="person-handle">@kaim</div></div>
+          <button class="follow">Follow</button>
+        </div>
+        <div class="person">
+          <div class="avatar">Z</div>
+          <div class="person-info"><div class="person-name">Zara Bello</div><div class="person-handle">@zarab</div></div>
+          <button class="follow">Follow</button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <button class="active" data-page="home" aria-label="Home">⌂</button>
+    <button data-page="discover" aria-label="Discover">✧</button>
+    <button data-page="profile" aria-label="Profile">◎</button>
+    <button data-page="messages" aria-label="Messages">◇</button>
+  </nav>
+
+  <script>
+    const feed = document.getElementById('feed');
+    const postInput = document.getElementById('postInput');
+    const search = document.getElementById('search');
+
+    let posts = [
+      {
+        id: 1,
+        name: 'Vibe Community',
+        handle: '@vibe',
+        text: 'Welcome to Vibe ✨ A fresh space to share your thoughts, meet new people, and be yourself. Your people, your space.',
+        likes: 12,
+        liked: false
+      },
+      {
+        id: 2,
+        name: 'Amara James',
+        handle: '@amaraj',
+        text: 'A reminder that you do not have to have everything figured out today. Small steps still count. 🌿',
+        likes: 8,
+        liked: false
+      }
+    ];
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;',
+        '"': '&quot;', "'": '&#39;'
+      })[char]);
+    }
+
+    function renderPosts(query = '') {
+      const filtered = posts.filter(post =>
+        (post.text + ' ' + post.name + ' ' + post.handle)
+          .toLowerCase().includes(query.toLowerCase())
+      );
+
+      if (!filtered.length) {
+        feed.innerHTML = '<div class="panel empty">No posts found. Try another search.</div>';
+        return;
+      }
+
+      feed.innerHTML = filtered.map(post => `
+        <article class="post">
+          <div class="post-head">
+            <div class="avatar">${escapeHTML(post.name.charAt(0).toUpperCase())}</div>
+            <div>
+              <div class="post-name">${escapeHTML(post.name)}</div>
+              <div class="post-handle">${escapeHTML(post.handle)} · Just now</div>
+            </div>
+          </div>
+          <div class="post-text">${escapeHTML(post.text)}</div>
+          <div class="post-actions">
+            <button class="action ${post.liked ? 'liked' : ''}" data-like="${post.id}">
+              ${post.liked ? '♥ Liked' : '♡ Like'} · ${post.likes}
+            </button>
+            <button class="action" data-comment="${post.id}">♡ Comment</button>
+            <button class="action" data-share="${post.id}">↗ Share</button>
+          </div>
+          <div id="comments-${post.id}"></div>
+        </article>
+      `).join('');
+    }
+
+    document.getElementById('postForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const text = postInput.value.trim();
+      if (!text) return;
+      posts.unshift({
+        id: Date.now(),
+        name: 'You',
+        handle: '@you',
+        text,
+        likes: 0,
+        liked: false
+      });
+      postInput.value = '';
+      renderPosts(search.value);
+    });
+
+    feed.addEventListener('click', event => {
+      const likeButton = event.target.closest('[data-like]');
+      const commentButton = event.target.closest('[data-comment]');
+      const shareButton = event.target.closest('[data-share]');
+
+      if (likeButton) {
+        const post = posts.find(item => item.id === Number(likeButton.dataset.like));
+        if (!post) return;
+        post.liked = !post.liked;
+        post.likes += post.liked ? 1 : -1;
+        renderPosts(search.value);
+      }
+
+      if (commentButton) {
+        const id = commentButton.dataset.comment;
+        const box = document.getElementById('comments-' + id);
+        box.innerHTML = '<form data-comment-form="' + id + '" style="display:flex;gap:8px;margin-top:12px"><input required maxlength="300" placeholder="Write a comment..." style="flex:1;min-width:0;padding:10px;border:1px solid #efedf4;border-radius:10px"><button class="primary" type="submit">Send</button></form>';
+        box.querySelector('input').focus();
+      }
+
+      if (shareButton) {
+        const post = posts.find(item => item.id === Number(shareButton.dataset.share));
+        if (post && navigator.share) {
+          navigator.share({ title: 'Vibe', text: post.text }).catch(() => {});
+        } else if (post && navigator.clipboard) {
+          navigator.clipboard.writeText(post.text).then(() => alert('Post text copied.'));
+        } else if (post) {
+          alert(post.text);
+        }
+      }
+    });
+
+    feed.addEventListener('submit', event => {
+      const form = event.target.closest('[data-comment-form]');
+      if (!form) return;
+      event.preventDefault();
+      const postId = Number(form.dataset.commentForm);
+      const input = form.querySelector('input');
+      const text = input.value.trim();
+      if (!text) return;
+      const box = document.getElementById('comments-' + postId);
+      const comment = document.createElement('p');
+      comment.className = 'muted';
+      comment.textContent = 'You: ' + text;
+      form.replaceWith(comment);
+      box.appendChild(comment);
+    });
+
+    search.addEventListener('input', () => renderPosts(search.value));
+
+    document.querySelectorAll('.follow').forEach(button => {
+      button.addEventListener('click', () => {
+        const following = button.classList.toggle('following');
+        button.textContent = following ? 'Following' : 'Follow';
+      });
+    });
+
+    document.querySelectorAll('[data-page]').forEach(button => {
+      button.addEventListener('click', event => {
+        if (button.tagName === 'A') event.preventDefault();
+        const page = button.dataset.page;
+        document.querySelectorAll('[data-page]').forEach(item => item.classList.remove('active'));
+        document.querySelectorAll('[data-page="' + page + ']').forEach(item => item.classList.add('active'));
+
+        if (page === 'home') {
+          document.querySelector('.welcome').style.display = '';
+          document.getElementById('postForm').style.display = '';
+          renderPosts(search.value);
+        } else if (page === 'discover') {
+          document.querySelector('.welcome').style.display = 'none';
+          document.getElementById('postForm').style.display = 'none';
+          renderPosts(search.value);
+        } else if (page === 'profile') {
+          document.querySelector('.welcome').style.display = 'none';
+          document.getElementById('postForm').style.display = 'none';
+          const mine = posts.filter(post => post.handle === '@you');
+          feed.innerHTML = mine.length ? '<h2>My posts</h2>' : '<div class="panel empty">Your profile is ready to grow. Create your first post on Home.</div>';
+          if (mine.length) renderPostsForProfile(mine);
+        } else if (page === 'messages') {
+          document.querySelector('.welcome').style.display = 'none';
+          document.getElementById('postForm').style.display = 'none';
+          feed.innerHTML = '<div class="panel empty"><h3>Messages</h3>Private messaging will be added when we connect the secure backend.</div>';
+        }
+      });
+    });
+
+    function renderPostsForProfile(items) {
+      feed.innerHTML = items.map(post => `
+        <article class="post">
+          <div class="post-name">${escapeHTML(post.name)}</div>
+          <div class="post-text">${escapeHTML(post.text)}</div>
+          <div class="muted">${post.likes} likes</div>
+        </article>
+      `).join('');
+    }
+
+    renderPosts();
+  </script>
+</body>
+</html>
