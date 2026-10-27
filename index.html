@@ -531,6 +531,245 @@
 
   console.log("Vibe connected to Supabase");
 </script>
-  
+  <!-- VIBE AUTHENTICATION -->
+<style>
+  #vibe-auth-button {
+    position: fixed;
+    right: 16px;
+    bottom: 18px;
+    z-index: 9998;
+    border: 0;
+    border-radius: 24px;
+    padding: 13px 20px;
+    background: #7047eb;
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 5px 20px #0002;
+  }
+  #vibe-auth-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #17132999;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  #vibe-auth-card {
+    width: 100%;
+    max-width: 390px;
+    background: white;
+    color: #211b35;
+    border-radius: 20px;
+    padding: 24px;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+  }
+  #vibe-auth-card input {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 12px 0;
+    padding: 13px;
+    border: 1px solid #ddd7ed;
+    border-radius: 10px;
+    font-size: 16px;
+  }
+  #vibe-auth-card button {
+    cursor: pointer;
+    border: 0;
+    border-radius: 10px;
+    padding: 12px;
+  }
+  #vibe-auth-submit {
+    width: 100%;
+    background: #7047eb;
+    color: white;
+    font-weight: bold;
+  }
+  #vibe-auth-switch {
+    background: transparent;
+    color: #7047eb;
+  }
+  #vibe-auth-message {
+    font-size: 14px;
+    overflow-wrap: anywhere;
+  }
+</style>
+
+<button id="vibe-auth-button">Log in / Sign up</button>
+
+<div id="vibe-auth-overlay">
+  <div id="vibe-auth-card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h2 id="vibe-auth-title">Welcome to Vibe</h2>
+      <button id="vibe-auth-close" aria-label="Close">✕</button>
+    </div>
+
+    <p id="vibe-auth-description">Create your account and join the community.</p>
+
+    <form id="vibe-auth-form">
+      <input id="vibe-auth-name" placeholder="Your display name"
+        autocomplete="name" maxlength="60" required>
+      <input id="vibe-auth-email" type="email" placeholder="Email address"
+        autocomplete="email" required>
+      <input id="vibe-auth-password" type="password"
+        placeholder="Password (at least 6 characters)"
+        autocomplete="new-password" minlength="6" required>
+      <button id="vibe-auth-submit" type="submit">Create account</button>
+    </form>
+
+    <p id="vibe-auth-message" role="status"></p>
+    <p>
+      <span id="vibe-auth-switch-text">Already have an account?</span>
+      <button id="vibe-auth-switch" type="button">Log in</button>
+    </p>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const overlay = $("vibe-auth-overlay");
+  const form = $("vibe-auth-form");
+  let mode = "signup";
+  let busy = false;
+
+  function showMessage(message) {
+    $("vibe-auth-message").textContent = message;
+  }
+
+  function setMode(nextMode) {
+    mode = nextMode;
+    $("vibe-auth-title").textContent =
+      mode === "signup" ? "Join Vibe" : "Welcome back";
+    $("vibe-auth-description").textContent =
+      mode === "signup"
+        ? "Create your account and join the community."
+        : "Log in to your Vibe account.";
+    $("vibe-auth-name").hidden = mode === "login";
+    $("vibe-auth-name").required = mode === "signup";
+    $("vibe-auth-password").autocomplete =
+      mode === "signup" ? "new-password" : "current-password";
+    $("vibe-auth-submit").textContent =
+      mode === "signup" ? "Create account" : "Log in";
+    $("vibe-auth-switch-text").textContent =
+      mode === "signup" ? "Already have an account?" : "New to Vibe?";
+    $("vibe-auth-switch").textContent =
+      mode === "signup" ? "Log in" : "Sign up";
+    showMessage("");
+  }
+
+  function openForm() {
+    overlay.style.display = "flex";
+  }
+
+  function closeForm() {
+    overlay.style.display = "none";
+  }
+
+  function updateButton(user) {
+    $("vibe-auth-button").textContent = user
+      ? "Account · Log out"
+      : "Log in / Sign up";
+  }
+
+  $("vibe-auth-button").addEventListener("click", async () => {
+    const { data, error } = await supabaseClient.auth.getUser();
+    if (error) {
+      showMessage(error.message);
+      openForm();
+      return;
+    }
+    if (data.user) {
+      if (confirm("Log out of Vibe?")) {
+        const { error: logoutError } =
+          await supabaseClient.auth.signOut();
+        if (logoutError) alert(logoutError.message);
+      }
+    } else {
+      setMode("signup");
+      openForm();
+    }
+  });
+
+  $("vibe-auth-close").addEventListener("click", closeForm);
+  overlay.addEventListener("click", event => {
+    if (event.target === overlay) closeForm();
+  });
+
+  $("vibe-auth-switch").addEventListener("click", () => {
+    setMode(mode === "signup" ? "login" : "signup");
+  });
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (busy) return;
+
+    busy = true;
+    $("vibe-auth-submit").disabled = true;
+    showMessage("Please wait...");
+
+    const email = $("vibe-auth-email").value.trim();
+    const password = $("vibe-auth-password").value;
+    const displayName = $("vibe-auth-name").value.trim();
+
+    try {
+      if (mode === "signup") {
+        const { data, error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { display_name: displayName },
+            emailRedirectTo: window.location.origin
+          }
+        });
+
+        if (error) throw error;
+
+        if (data.session) {
+          showMessage("Account created! You are now logged in.");
+          closeForm();
+        } else {
+          showMessage(
+            "Account request received. Check your email to confirm your account before logging in."
+          );
+        }
+      } else {
+        const { error } =
+          await supabaseClient.auth.signInWithPassword({
+            email,
+            password
+          });
+
+        if (error) throw error;
+
+        showMessage("Logged in successfully!");
+        closeForm();
+      }
+    } catch (error) {
+      showMessage(error.message || "Something went wrong. Please try again.");
+    } finally {
+      busy = false;
+      $("vibe-auth-submit").disabled = false;
+    }
+  });
+
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    updateButton(session?.user || null);
+  });
+
+  supabaseClient.auth.getSession().then(({ data, error }) => {
+    if (error) {
+      showMessage(error.message);
+      return;
+    }
+    updateButton(data.session?.user || null);
+  });
+
+  setMode("signup");
+})();
+</script>
 </body>
 </html>
